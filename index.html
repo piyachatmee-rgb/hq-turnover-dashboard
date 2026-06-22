@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HQ Employee Turnover Dashboard | Looker Studio Prototype</title>
+  <meta name="description" content="ระบบจำลอง Dashboard วิเคราะห์การลาออกของพนักงาน HQ สำหรับ HRBP และผู้บริหาร">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- CSS Styles -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- --- Left Sidebar Navigation --- -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); margin-right: 2px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>HQ People Analytics</span>
+        </div>
+        
+        <ul class="sidebar-menu">
+          <li>
+            <div class="menu-item active" id="menu-overview">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+              <span>1. ภาพรวมผู้บริหาร</span>
+            </div>
+          </li>
+          <li>
+            <div class="menu-item" id="menu-traceability">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0 5.4 5.4 0 0 0 0 7.65l8.42 8.42 8.42-8.42a5.4 5.4 0 0 0 0-7.65Z"/><path d="M12 5.23V19"/></svg>
+              <span>2. เจาะลึกรายโครงสร้าง</span>
+            </div>
+          </li>
+          <li>
+            <div class="menu-item" id="menu-accountability">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m19 12-2-2-2 2"/><path d="M17 10v6"/></svg>
+              <span>3. อัตราลาออกรายหัวหน้า</span>
+            </div>
+          </li>
+          <li>
+            <div class="menu-item" id="menu-reasons">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+              <span>4. สาเหตุและการลาออก</span>
+            </div>
+          </li>
+          <li style="margin-top: 1rem; border-top: 1px solid var(--card-border); padding-top: 1rem;">
+            <div class="menu-item" id="menu-guide" style="color: var(--color-secondary);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              <span>SQL & Looker Studio Guide</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" id="theme-toggle-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <span>สลับเป็นธีมสว่าง</span>
+        </button>
+
+        <div class="sidebar-user">
+          <div class="user-avatar">HR</div>
+          <div class="user-info">
+            <span class="user-name">พี่ชล & People Team</span>
+            <span class="user-role">HRBP HQ Analytics</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- --- Main Content Panel --- -->
+    <main class="main-content">
+      
+      <!-- Top Filters bar shared by dashboard sheets -->
+      <div id="dashboard-filters-container" style="background-color: var(--card-bg); border: 1px solid var(--card-border); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">แผงกรองข้อมูลหลัก:</span>
+        
+        <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.5rem;">
+          <label style="margin: 0;">ช่วงเวลา:</label>
+          <select class="filter-select" id="global-time-filter">
+            <option value="YTD">YTD (ม.ค. 2026 - ปัจจุบัน)</option>
+            <option value="2025">ปี 2025 (เต็มปี)</option>
+            <option value="2024">ปี 2024 (เต็มปี)</option>
+            <option value="3years">ย้อนหลัง 3 ปี (2024 - 2026)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.5rem;">
+          <label style="margin: 0;">สำนัก (Division):</label>
+          <select class="filter-select" id="global-division-filter">
+            <option value="all">ทั้งหมด ทุกสำนัก</option>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.5rem;">
+          <label style="margin: 0;">ระดับตำแหน่ง (Job Grade):</label>
+          <select class="filter-select" id="global-grade-filter">
+            <option value="all">ทั้งหมด ทุกระดับ</option>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <button class="btn-action" id="reset-filters-btn" style="margin-left: auto; padding: 0.4rem 0.75rem; font-size: 0.8rem;">
+          ล้างตัวกรองทั้งหมด
+        </button>
+      </div>
+
+      <!-- ==============================================
+           VIEW 1: EXECUTIVE OVERVIEW (ภาพรวมผู้บริหาร)
+           ============================================== -->
+      <div id="view-overview" class="dashboard-view active">
+        <section class="header-section">
+          <div class="header-title">
+            <h1>ภาพรวมอัตราการลาออกระดับสำนักงานใหญ่ (HQ Turnover Summary)</h1>
+            <p>หน้าหลักแสดง Turnover Rate แบบ Near Real-time เปรียบเทียบเป้าหมายและสัดส่วนพนักงานลาออกของ HQ</p>
+          </div>
+          <div class="header-controls">
+            <span class="badge badge-info" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Single Source of Truth</span>
+          </div>
+        </section>
+
+        <!-- KPI Metrics Row -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-content">
+              <span class="stat-label">กำลังพล ณ ปลายงวด</span>
+              <span class="stat-value" id="kpi-headcount">0</span>
+              <span class="stat-trend trend-up" id="kpi-headcount-sub">Active HQ Employees</span>
+            </div>
+            <div class="stat-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-danger">
+            <div class="stat-content">
+              <span class="stat-label">จำนวนการลาออกสะสม</span>
+              <span class="stat-value" id="kpi-exits">0 คน</span>
+              <span class="stat-trend trend-down" id="kpi-exits-sub">ในช่วงเวลาที่เลือก</span>
+            </div>
+            <div class="stat-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4"/><polyline points="12 9 12 17 12 17"/><polyline points="16 13 12 17 8 13"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-warning">
+            <div class="stat-content">
+              <span class="stat-label">อัตราการลาออก (Turnover Rate)</span>
+              <span class="stat-value" id="kpi-turnover-rate">0.0%</span>
+              <span class="stat-trend" id="kpi-turnover-sub" style="color: var(--color-warning);">เป้าหมายปีนี้: &lt; 15%</span>
+            </div>
+            <div class="stat-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-success">
+            <div class="stat-content">
+              <span class="stat-label">อัตราลาออกเสียดาย (Regretful TR)</span>
+              <span class="stat-value" id="kpi-regretful-rate">0.0%</span>
+              <span class="stat-trend trend-up" id="kpi-regretful-sub">จากพนักงานกลุ่มเก่ง (Top Talent)</span>
+            </div>
+            <div class="stat-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+          </div>
+        </section>
+
+        <!-- Charts Layout Row 1 -->
+        <div class="dashboard-grid" style="margin-bottom: 1.5rem;">
+          <div class="glass-card col-8">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>แนวโน้มอัตรากำลังพลและอัตราการลาออกรายเดือน (Monthly Headcount vs Turnover Trend)</h3>
+                <p>เปรียบเทียบจำนวนพนักงานปัจจุบัน (Bar) กับร้อยละการลาออกในแต่ละเดือน (Line)</p>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 300px;">
+              <canvas id="overview-trend-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card col-4">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>สัดส่วนความสูญเสียพนักงานใหม่ (Early Attrition Rate)</h3>
+                <p>จำนวนคนออกจำแนกตามช่วงเวลาอายุงาน (Tenure Groups)</p>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 300px;">
+              <canvas id="overview-tenure-pie"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Layout Row 2 -->
+        <div class="dashboard-grid">
+          <div class="glass-card col-6">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>อัตราการลาออกจำแนกรายสำนัก (Turnover Rate by Division)</h3>
+                <p>เทียบสัดส่วนและเปอร์เซ็นต์การลาออกรายสำนักหลักของ HQ</p>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 250px;">
+              <canvas id="overview-division-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card col-6">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>การลาออกแยกตามระดับระดับตำแหน่ง (Turnover by Job Grade)</h3>
+                <p>วิเคราะห์ว่าพนักงานในระดับชั้นงานไหนที่มีปัญหาการลาออกสูงสุด</p>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 250px;">
+              <canvas id="overview-grade-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================
+           VIEW 2: ORGANIZATIONAL TRACEABILITY (วิเคราะห์โครงสร้าง)
+           ============================================== -->
+      <div id="view-traceability" class="dashboard-view">
+        <section class="header-section">
+          <div class="header-title">
+            <h1>เจาะลึกวิเคราะห์สายโครงสร้างองค์กร (Organizational Traceability)</h1>
+            <p>สืบค้นหาฟังก์ชันงาน แผนก หรือทีมย่อยที่มีปัญหาการลาออกสะสมสูงสุดแบบเจาะจงโครงสร้าง ณ วันที่เกิดเหตุ</p>
+          </div>
+        </section>
+
+        <!-- Treemap Visual Section Mockup -->
+        <div class="glass-card" style="margin-bottom: 1.5rem;">
+          <div class="glass-card-header">
+            <div class="card-title">
+              <h3>แผนภูมิสัดส่วนการสูญเสียพนักงานแยกตามแผนก (Exits Heatmap by Department)</h3>
+              <p>ขนาดกล่องคือจำนวนพนักงานลาออก / ความเข้มของสีสะท้อนความรุนแรงของ Turnover Rate</p>
+            </div>
+          </div>
+          
+          <div class="treemap-mockup" id="traceability-treemap">
+            <div class="treemap-box treemap-box-main" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(239, 68, 68, 0.15)); border: 1px solid rgba(239, 68, 68, 0.4);">
+              <div>
+                <span class="badge badge-danger">High Attrition Area</span>
+                <h2 style="font-family: 'Outfit', sans-serif; margin-top: 0.5rem; font-size: 1.5rem;">Software Engineering</h2>
+                <p style="font-size: 0.85rem; opacity: 0.8;">Technology Division</p>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 2rem; font-weight: 800;">45.2%</span>
+                <p style="font-size: 0.75rem;">Turnover Rate (YTD)</p>
+              </div>
+            </div>
+            <div class="treemap-box" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(245, 158, 11, 0.1)); border: 1px solid rgba(245, 158, 11, 0.3);">
+              <div>
+                <span class="badge badge-warning">Moderate</span>
+                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-top: 0.25rem;">Digital Marketing</h3>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <span style="font-size: 0.75rem; opacity: 0.8;">Marketing Division</span>
+                <span style="font-size: 1.25rem; font-weight: 700;">22.5%</span>
+              </div>
+            </div>
+            <div class="treemap-box" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05)); border: 1px solid rgba(16, 185, 129, 0.25);">
+              <div>
+                <span class="badge badge-success">Healthy</span>
+                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-top: 0.25rem;">Accounting</h3>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <span style="font-size: 0.75rem; opacity: 0.8;">Finance Division</span>
+                <span style="font-size: 1.25rem; font-weight: 700;">4.8%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Structural Hierarchical Table -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title">
+              <h3>ตารางแจกแจงโครงสร้างพนักงานและการลาออก (Org Unit Attrition Table)</h3>
+              <p>สามารถกรองดูสัดส่วน เปรียบเทียบกำลังคนเริ่มต้น กำลังคนสุดท้าย จำนวนลาออก และค่าเฉลี่ยอายุงานของคนลาออกแยกแต่ละฟังก์ชัน</p>
+            </div>
+            <div class="filters-bar" style="display: flex; gap: 0.5rem;">
+              <input type="text" id="org-search-input" placeholder="ค้นหา ฝ่าย/แผนก..." class="filter-select" style="min-width: 200px;">
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="custom-table" id="org-traceability-table">
+              <thead>
+                <tr>
+                  <th>สำนัก (Division)</th>
+                  <th>ฝ่าย/แผนก (Department)</th>
+                  <th>ทีมย่อย (Section)</th>
+                  <th style="text-align: right;">กำลังคนต้นงวด</th>
+                  <th style="text-align: right;">กำลังคนปลายงวด</th>
+                  <th style="text-align: right; color: var(--color-danger);">ลาออก (Exits)</th>
+                  <th style="text-align: right;">เฉลี่ยอายุงานคนออก</th>
+                  <th style="text-align: right;">% Turnover Rate</th>
+                </tr>
+              </thead>
+              <tbody id="org-table-body">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================
+           VIEW 3: LEADERSHIP ACCOUNTABILITY (รายหัวหน้า)
+           ============================================== -->
+      <div id="view-accountability" class="dashboard-view">
+        <section class="header-section">
+          <div class="header-title">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+              <h1>ความรับผิดชอบและการประเมินประสิทธิภาพหัวหน้างาน (Leadership Accountability)</h1>
+              <span class="badge badge-danger" style="font-size: 0.7rem;">CONFIDENTIAL - HRBP ONLY</span>
+            </div>
+            <p>ติดตามอัตราการลาออกของพนักงานภายใต้บังคับบัญชาของหัวหน้าแต่ละท่าน ณ วันที่ลาออกจริง เพื่อประเมินภาวะผู้นำ (Managerial Effectiveness)</p>
+          </div>
+        </section>
+
+        <div class="dashboard-grid" style="margin-bottom: 1.5rem;">
+          <!-- Left: Scatter Plot Matrix -->
+          <div class="glass-card col-6">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>แผนภาพประเมินพฤติกรรมการควบคุมกำลังพล (Manager Attrition Scatter Plot)</h3>
+                <p>แกน X: ขนาดทีมเฉลี่ย | แกน Y: อัตราการลาออกของทีม (%) | จุดที่อยู่โซนซ้ายบน/ขวาบนคือพื้นที่เฝ้าระวังวิกฤต</p>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 320px; display: flex; align-items: center; justify-content: center; position: relative;">
+              <canvas id="manager-scatter-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Right: Leaderboard Stats -->
+          <div class="glass-card col-6">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>ผู้นำที่มีอัตราการลาออกสะสมสูงสุด (Top Turnover by Direct Manager)</h3>
+                <p>แสดงรายชื่อหัวหน้าที่มีพนักงานลาออกอย่างน้อย 1 คน จัดลำดับตามอัตรา % Turnover สูงสุด</p>
+              </div>
+              <input type="text" id="manager-search-input" placeholder="ค้นหาชื่อหัวหน้า..." class="filter-select" style="min-width: 180px; padding: 0.4rem 0.8rem;">
+            </div>
+            
+            <div class="table-wrapper" style="max-height: 320px; overflow-y: auto;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>ชื่อหัวหน้างาน (Direct Manager)</th>
+                    <th>สำนัก (Division)</th>
+                    <th style="text-align: right;">ขนาดทีม</th>
+                    <th style="text-align: right; color: var(--color-danger);">ลาออก</th>
+                    <th style="text-align: right;">เฉลี่ยอายุงานคนออก</th>
+                    <th style="text-align: right;">% Turnover</th>
+                  </tr>
+                </thead>
+                <tbody id="manager-table-body">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manager Analytics Notice Alert -->
+        <div style="background-color: rgba(124, 58, 237, 0.08); border: 1px dashed var(--color-primary); border-radius: 12px; padding: 1.25rem; display: flex; gap: 1rem; align-items: flex-start;">
+          <div style="background-color: var(--color-primary-glow); padding: 0.5rem; border-radius: 8px; color: var(--color-primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          </div>
+          <div>
+            <h4 style="font-family: 'Outfit', sans-serif; color: var(--text-main); font-size: 0.95rem; margin-bottom: 0.25rem;">ข้อควรระวังในการบริหารจัดการข้อมูล (HRBP Analytics Insight)</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">การวัดอัตรา Turnover รายหัวหน้ามีไว้เพื่อ **ช่วยออกแบบโปรแกรมสนับสนุนและฝึกอบรมภาวะผู้นำ (Managerial Program) ร่วมกันอย่างโปร่งใส** ไม่ควรใช้เป็นเครื่องมือลงโทษโดยไม่ได้ดูบริบทประกอบ เนื่องจากบางฟังก์ชันงาน (เช่น เทคโนโลยี) มีความต้องการทางตลาดภายนอกสูงซึ่งส่งผลให้เกิดการดึงตัวพนักงานออกไปได้ง่ายกว่าสายงานอื่น</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================
+           VIEW 4: ROOT CAUSE & DEMOGRAPHICS (สาเหตุและการวิเคราะห์)
+           ============================================== -->
+      <div id="view-reasons" class="dashboard-view">
+        <section class="header-section">
+          <div class="header-title">
+            <h1>เจาะลึกสาเหตุการลาออกและข้อมูลประชากรพนักงาน (Exit Reasons & Demographics)</h1>
+            <p>วิเคราะห์ "สาเหตุที่แท้จริง" (Exit Reason Themes) จำแนกตามช่วงเวลา ประเภทการลาออก และความเชื่อมโยงกับผลประเมินงาน</p>
+          </div>
+        </section>
+
+        <!-- Charts Grid Row 1 -->
+        <div class="dashboard-grid" style="margin-bottom: 1.5rem;">
+          <!-- Horizontal Bar Chart: Exit Reasons -->
+          <div class="glass-card col-8">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>อันดับสาเหตุการลาออกที่พนักงานระบุ (Ranked Resignation Reasons)</h3>
+                <p>วิเคราะห์ข้อมูลจากการทำ Exit Interview จัดกลุ่มตามมาตรฐานหมวดหมู่ HR</p>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 300px;">
+              <canvas id="reasons-bar-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Pie Chart: Voluntary vs Involuntary -->
+          <div class="glass-card col-4">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>ประเภทการสิ้นสุดสัญญาจ้าง (Termination Type)</h3>
+                <p>เปรียบเทียบสัดส่วนระหว่างการลาออกเองกับการให้ออก</p>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 300px;">
+              <canvas id="reasons-type-pie"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid Row 2 -->
+        <div class="dashboard-grid">
+          <!-- Cumulative Tenure Heatmap -->
+          <div class="glass-card col-6">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>ความหนาแน่นช่วงเวลาการลาออกแบ่งตามอายุงาน (Exited Employees Tenure Heatmap)</h3>
+                <p>จำนวนพนักงานลาออกจำแนกตามจำนวนเดือนที่เริ่มงาน (ดูจุดเสี่ยงสูงสุดในรอบปีแรก)</p>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 250px;">
+              <canvas id="reasons-tenure-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Regretful Attrition breakdown by Performance Rating -->
+          <div class="glass-card col-6">
+            <div class="glass-card-header">
+              <div class="card-title">
+                <h3>ผลสัมฤทธิ์การทำงานของพนักงานที่ลาออก (Exited Employees Performance)</h3>
+                <p>สัดส่วนระดับประเมินงานปีล่าสุดของคนที่ลาออกไปทั้งหมดเพื่อประเมินความเสียหายเชิงคุณภาพ (Regretful Loss)</p>
+              </div>
+            </div>
+            <div class="chart-container" style="height: 250px;">
+              <canvas id="reasons-perf-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================
+           VIEW 5: SQL & LOOKER STUDIO GUIDE (คู่มือเทคนิค)
+           ============================================== -->
+      <div id="view-guide" class="dashboard-view">
+        <section class="header-section">
+          <div class="header-title">
+            <h1>คู่มือการจัดเตรียมข้อมูลบน BigQuery และการตั้งค่าบน Looker Studio</h1>
+            <p>เอกสารสรุปความเข้าใจสำหรับส่งต่อให้ทีม HRIS / Data Engineer เพื่อเตรียม Data Mart และเขียนสูตรใน Data Studio</p>
+          </div>
+        </section>
+
+        <div class="glass-card">
+          <div class="guide-content">
+            
+            <h2>1. แนวทางจัดเตรียมตารางบน BigQuery (Slowly Changing Dimension Concept)</h2>
+            <p>เพื่อตอบรับโจทย์ของพี่หัวหน้าในการเก็บโครงสร้างองค์กรและหัวหน้างาน <strong>"ณ วันที่ลาออกจริง" (As-of-Event)</strong> และป้องกันข้อมูลเปลี่ยนแปลงเมื่อมีการ Re-org ในอนาคต ให้สร้างตาราง Data View หรือ Data Mart ชื่อ <code>dm_hq_employee_monthly_snapshot</code> ด้วยโครงสร้างดังต่อไปนี้:</p>
+
+            <pre><code>CREATE OR REPLACE TABLE `your_project.hr_analytics.dm_hq_employee_monthly_snapshot` AS
+WITH calendar AS (
+  -- สร้างชุดข้อมูลวันสิ้นเดือนของทุกเดือนย้อนหลัง 3 ปี
+  SELECT snapshot_date 
+  FROM UNNEST(GENERATE_DATE_ARRAY('2023-01-01', CURRENT_DATE(), INTERVAL 1 MONTH)) AS snapshot_date
+),
+employee_history AS (
+  -- ดึงข้อมูลประวัติพนักงานย้อนหลังรวมถึงสถานะการทำงาน
+  SELECT 
+    employee_id,
+    name,
+    job_title,
+    job_grade,
+    status,
+    division,
+    department,
+    section,
+    team,
+    manager_id,
+    manager_name,
+    hire_date,
+    termination_date,
+    exit_type,
+    resignation_reason,
+    performance_rating,
+    -- ตัวกำหนดช่วงเวลาของ record
+    valid_from,
+    COALESCE(valid_to, DATE '9999-12-31') AS valid_to
+  FROM `your_project.hr_source.employee_history_scd2`
+)
+SELECT 
+  c.snapshot_date AS snapshot_month,
+  e.employee_id,
+  e.name,
+  e.job_title,
+  e.job_grade,
+  e.division,
+  e.department,
+  e.section,
+  e.team,
+  e.manager_id,
+  e.manager_name,
+  e.hire_date,
+  e.termination_date,
+  e.exit_type,
+  e.resignation_reason,
+  e.performance_rating,
+  -- ตรวจสอบและตั้งแฟล็กเช็กเพื่อช่วยคำนวณใน Looker Studio
+  CASE WHEN e.status = 'Active' AND (e.termination_date IS NULL OR e.termination_date > c.snapshot_date) THEN 1 ELSE 0 END AS is_active,
+  CASE WHEN e.status = 'Terminated' AND e.termination_date >= c.snapshot_date AND e.termination_date < DATE_ADD(c.snapshot_date, INTERVAL 1 MONTH) THEN 1 ELSE 0 END AS is_exit
+FROM calendar c
+JOIN employee_history e 
+  ON c.snapshot_date >= e.valid_from AND c.snapshot_date < e.valid_to;</code></pre>
+
+            <h2>2. สูตรคำนวณอัตราการลาออก (Turnover Rate Formula) ใน Looker Studio</h2>
+            <p>เพื่อหลีกเลี่ยงปัญหา Looker Studio ฟิลเตอร์วันที่แล้วทำให้ประวัติ headcount ต้นงวดหายไป ให้ตั้งค่า Calculated Fields ดังนี้:</p>
+
+            <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border); padding: 1.25rem; border-radius: 8px;">
+              <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                <li>
+                  <strong>1. จำนวนคนลาออกในงวด (Exits in Period)</strong><br>
+                  สร้างฟิลด์คำนวณใหม่: <code>Exits_Period</code> = <code>SUM(is_exit)</code>
+                </li>
+                <li>
+                  <strong>2. จำนวนคนทำงานเฉลี่ยในงวด (Average Headcount in Period)</strong><br>
+                  สร้างฟิลด์คำนวณใหม่: <code>Avg_Headcount_Period</code> = <code>SUM(is_active) / COUNT_DISTINCT(snapshot_month)</code>
+                </li>
+                <li>
+                  <strong>3. อัตราการลาออกร้อยละ (Turnover Rate %)</strong><br>
+                  สร้างฟิลด์คำนวณใหม่: <code>Turnover_Rate_Percent</code> = <code>SUM(is_exit) / (SUM(is_active) / COUNT_DISTINCT(snapshot_month))</code><br>
+                  <em>*หมายเหตุ: เลือก Format Type ของฟิลด์คำนวณนี้เป็น <strong>Numeric -> Percent</strong> เพื่อให้แสดงผลลัพธ์เป็นร้อยละอย่างสวยงาม</em>
+                </li>
+              </ul>
+            </div>
+
+            <h2>3. รายละเอียดการสร้างรายงานแยกหน้า (Recommended Looker Studio Pages Setup)</h2>
+            <p>เราออกแบบโครงสร้างหน้ากระดาษเป็นสัดส่วน 4 หน้า เพื่อตอบสนองความต้องการของผู้ใช้แต่ละกลุ่มดังนี้:</p>
+            <table class="custom-table" style="margin-top: 1rem; border-top: 1px solid var(--card-border);">
+              <thead>
+                <tr>
+                  <th>หน้า (Pages)</th>
+                  <th>ผู้ใช้งานหลัก</th>
+                  <th>เป้าหมายหลักในการเปิดหน้าจอ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1. ภาพรวมผู้บริหาร (Executive Overview)</strong></td>
+                  <td>ผู้บริหารระดับสูง, พี่ชล, หัวหน้า People HQ</td>
+                  <td>ดูทิศทางการลาออกรวม เทียบเกณฑ์ตั้งรับความเสี่ยง เพื่อหาแผนงานด่วน</td>
+                </tr>
+                <tr>
+                  <td><strong>2. เจาะลึกรายโครงสร้าง (Org Traceability)</strong></td>
+                  <td>HRBP HQ Team, People Analytics</td>
+                  <td>วิเคราะห์หาจุดรั่วไหลระดับโครงสร้าง สำนัก -> ฝ่าย -> แผนก เพื่อวางกลยุทธ์ป้องกัน</td>
+                </tr>
+                <tr>
+                  <td><strong>3. ความรับผิดชอบรายหัวหน้า (Leadership Accountability)</strong></td>
+                  <td>HRBP HQ Team (จำกัดสิทธิ์ความปลอดภัย)</td>
+                  <td>สืบค้นหัวหน้างานที่มีปัญหาลาออกซ้ำซาก เพื่อเข้าพูดคุย/สนับสนุนแบบรายบุคคล</td>
+                </tr>
+                <tr>
+                  <td><strong>4. สาเหตุและการลาออก (Exit Reasons & Demographics)</strong></td>
+                  <td>HRBP HQ Team, People Operation</td>
+                  <td>วิเคราะห์ความสัมพันธ์ระหว่างเหตุผลการลาออก, อายุงาน และระดับประเมินงานคนเก่ง</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Javascript Modules -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
