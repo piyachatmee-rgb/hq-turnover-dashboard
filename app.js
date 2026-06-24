@@ -17,6 +17,36 @@ document.addEventListener("DOMContentLoaded", () => {
     theme: "dark"
   };
 
+  // --- API Configuration ---
+  let useLiveAPI = false;
+  const API_BASE = "http://localhost:3000/api";
+
+  // Check if API server is online
+  const checkAPIStatus = async () => {
+    const statusBadge = document.getElementById("api-status-badge");
+    try {
+      const res = await fetch(`${API_BASE}/health`);
+      const data = await res.json();
+      if (data.status === 'healthy') {
+        useLiveAPI = true;
+        if (statusBadge) {
+          statusBadge.className = "badge badge-success";
+          statusBadge.textContent = "BigQuery Live Mode";
+          statusBadge.style.backgroundColor = "rgba(16, 185, 129, 0.15)";
+          statusBadge.style.color = "var(--color-success)";
+        }
+        console.log("Connected to BigQuery API Gateway successfully!");
+      }
+    } catch (e) {
+      useLiveAPI = false;
+      if (statusBadge) {
+        statusBadge.className = "badge badge-info";
+        statusBadge.textContent = "Standalone Mock Mode";
+      }
+      console.log("BigQuery API Gateway offline. Running in Standalone Mock Mode.");
+    }
+  };
+
   // --- DOM Elements ---
   const menuOverview = document.getElementById("menu-overview");
   const menuTraceability = document.getElementById("menu-traceability");
@@ -135,8 +165,22 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- Filter and Calculate Aggregates ---
-  const getFilteredData = () => {
+  const getFilteredData = async () => {
     const { startDate, endDate } = getDateRange(state.timeFilter);
+
+    if (useLiveAPI) {
+      try {
+        const url = `${API_BASE}/snapshots?timeFilter=${state.timeFilter}&division=${state.divisionFilter}&grade=${state.gradeFilter}`;
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json.success) {
+          return { filteredSnapshots: json.data, startDate, endDate };
+        }
+      } catch (err) {
+        console.error("Failed to fetch from BigQuery API, falling back to mock data.", err);
+      }
+    }
+
     const start = new Date(startDate);
     const end = new Date(endDate);
 
@@ -160,8 +204,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- Core Update Dashboard Function ---
-  const updateDashboard = () => {
-    const { filteredSnapshots, startDate, endDate } = getFilteredData();
+  const updateDashboard = async () => {
+    const { filteredSnapshots, startDate, endDate } = await getFilteredData();
     
     // Find all unique months in this period
     const months = [...new Set(filteredSnapshots.map(r => r.snapshot_month))].sort();
@@ -816,8 +860,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state.orgSearch = e.target.value;
       const activeView = Object.keys(views).find(key => views[key].classList.contains("active"));
       if (activeView === "traceability") {
-        const { filteredSnapshots, months } = getFilteredData();
-        renderTraceabilityData(filteredSnapshots, months);
+        updateDashboard();
       }
     });
   }
@@ -827,8 +870,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state.managerSearch = e.target.value;
       const activeView = Object.keys(views).find(key => views[key].classList.contains("active"));
       if (activeView === "accountability") {
-        const { filteredSnapshots, months } = getFilteredData();
-        renderAccountabilityData(filteredSnapshots, months);
+        updateDashboard();
       }
     });
   }
@@ -859,5 +901,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // --- Initial Render ---
-  updateDashboard();
+  const init = async () => {
+    await checkAPIStatus();
+    updateDashboard();
+  };
+  init();
 });
