@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- API Configuration ---
   let useLiveAPI = false;
-  const API_BASE = "http://localhost:3000/api";
+  const API_BASE = "https://hq-turnover-api-677096835216.asia-southeast1.run.app/api";
 
   // Check if API server is online
   const checkAPIStatus = async () => {
