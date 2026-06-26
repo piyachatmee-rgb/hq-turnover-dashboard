@@ -106,11 +106,28 @@ app.get('/api/snapshots', async (req, res) => {
     
     console.log(`Success! Fetched ${rows.length} rows from BigQuery.`);
 
+    // Normalize BigQuery Date objects ({"value": "YYYY-MM-DD"}) to plain strings
+    const normalizedRows = rows.map(row => {
+      const newRow = { ...row };
+      
+      if (newRow.snapshot_month && typeof newRow.snapshot_month === 'object' && newRow.snapshot_month.value) {
+        newRow.snapshot_month = newRow.snapshot_month.value;
+      }
+      if (newRow.hire_date && typeof newRow.hire_date === 'object' && newRow.hire_date.value) {
+        newRow.hire_date = newRow.hire_date.value;
+      }
+      if (newRow.termination_date && typeof newRow.termination_date === 'object' && newRow.termination_date.value) {
+        newRow.termination_date = newRow.termination_date.value;
+      }
+      
+      return newRow;
+    });
+
     // 4. Return sanitized data (Names are stripped out in SELECT to maintain privacy)
     res.json({
       success: true,
-      count: rows.length,
-      data: rows
+      count: normalizedRows.length,
+      data: normalizedRows
     });
 
   } catch (error) {

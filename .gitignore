@@ -1,0 +1,13 @@
+# Dependency directories
+node_modules/
+
+# Local env files
+.env
+.env.local
+
+# GCP Keys
+gcp-key.json
+
+# OS files
+.DS_Store
+Thumbs.db
